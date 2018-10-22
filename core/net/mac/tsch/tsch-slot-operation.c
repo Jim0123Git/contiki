@@ -990,10 +990,17 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
            **/
           static struct pt slot_tx_pt;
           PT_SPAWN(&slot_operation_pt, &slot_tx_pt, tsch_tx_slot(&slot_tx_pt, t));
+
+          tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;
+          printf("_______TSCH Tx slot: mAh = %lld\n", tsch_current_mAh);
+
         } else {
           /* Listen */
           static struct pt slot_rx_pt;
           PT_SPAWN(&slot_operation_pt, &slot_rx_pt, tsch_rx_slot(&slot_rx_pt, t));
+
+          tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
+          printf("_______TSCH Rx slot: mAh = %lld\n", tsch_current_mAh);
         }
       }
       TSCH_DEBUG_SLOT_END();
@@ -1037,6 +1044,13 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
         }
         /* Update ASN */
         TSCH_ASN_INC(tsch_current_asn, timeslot_diff);
+
+        /* timeslot_diff = number of idle slots  */
+        printf("_______idle slot = %hd\n", timeslot_diff - 1 );
+        /* idle slot power consumption */
+        tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
+        printf("_______TSCH idle slot: mAh = %lld\n", tsch_current_mAh);
+
         /* Time to next wake up */
         time_to_next_active_slot = timeslot_diff * tsch_timing[tsch_ts_timeslot_length] + drift_correction;
         drift_correction = 0;
@@ -1075,6 +1089,13 @@ tsch_slot_operation_start(void)
     }
     /* Update ASN */
     TSCH_ASN_INC(tsch_current_asn, timeslot_diff);
+
+    /* timeslot_diff = number of idle slots  */
+    printf("_______idle slot = %hd\n", timeslot_diff - 1 );
+    /* idle slot power consumption */
+    tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
+    printf("_______TSCH idle slot: mAh = %lld\n", tsch_current_mAh);
+
     /* Time to next wake up */
     time_to_next_active_slot = timeslot_diff * tsch_timing[tsch_ts_timeslot_length];
     /* Update current slot start */

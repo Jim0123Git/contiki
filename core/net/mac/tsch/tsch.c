@@ -144,6 +144,11 @@ static clock_time_t tsch_current_ka_timeout;
 /* The current Electricity */
 //struct tsch_electricity_t tsch_current_mAh;
 uint64_t tsch_current_mAh = 3000000000000;
+/* Power cinsumption in each slot mode  */
+extern uint32_t tsch_TXslot_consumption = 111619;
+extern uint32_t tsch_RXslot_consumption = 97838;
+extern uint32_t tsch_EBslot_consumption = 134334;
+extern uint32_t tsch_IDLEslot_consumption = 1169;
 
 /* timer for sending keepalive messages */
 static struct ctimer keepalive_timer;
@@ -1005,7 +1010,7 @@ turn_on(void)
     TSCH_AH_INIT(tsch_current_mAh, 698, 2112827392);
     printf("\n________TSCH: mAh.ls4b = %ld_________\n", tsch_current_mAh.ls4b);
     printf("\n________TSCH: mAh.ms2b = %hu_________\n", tsch_current_mAh.ms2b);*/
-    printf("\n________TSCH: mAh = %lld_________\n", tsch_current_mAh);
+    printf("\n_______TSCH: mAh = %lld\n", tsch_current_mAh);
     /* Process tx/rx callback and log messages whenever polled */
     process_start(&tsch_pending_events_process, NULL);
     /* periodically send TSCH EBs */

@@ -193,6 +193,10 @@ struct tsch_electricity_t {
 };
 /* The current Electricity */
 extern uint64_t tsch_current_mAh ;
+extern uint32_t tsch_TXslot_consumption ;
+extern uint32_t tsch_RXslot_consumption ;
+extern uint32_t tsch_EBslot_consumption ;
+extern uint32_t tsch_IDLEslot_consumption ;
 
 /* Initialize Electricity */
 #define TSCH_AH_INIT(mAh, ms2b_, ls4b_) do { \
