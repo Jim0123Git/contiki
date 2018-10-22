@@ -191,6 +191,8 @@ struct tsch_electricity_t {
     uint32_t ls4b; /* least significant 4 bytes */
     uint16_t ms2b; /* most significant 2 byte */
 };
+/* The current Electricity */
+extern uint64_t tsch_current_mAh ;
 
 /* Initialize Electricity */
 #define TSCH_AH_INIT(mAh, ms2b_, ls4b_) do { \

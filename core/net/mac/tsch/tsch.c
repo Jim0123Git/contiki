@@ -142,7 +142,8 @@ static clock_time_t tsch_current_eb_period;
 /* Current period for keepalive output */
 static clock_time_t tsch_current_ka_timeout;
 /* The current Electricity */
-struct tsch_electricity_t tsch_current_mAh;
+//struct tsch_electricity_t tsch_current_mAh;
+uint64_t tsch_current_mAh = 3000000000000;
 
 /* timer for sending keepalive messages */
 static struct ctimer keepalive_timer;
@@ -1000,9 +1001,11 @@ turn_on(void)
   if(tsch_is_initialized == 1 && tsch_is_started == 0) {
     tsch_is_started = 1;
     /* electircity set 3000mAh */
+    /* old design
     TSCH_AH_INIT(tsch_current_mAh, 698, 2112827392);
     printf("\n________TSCH: mAh.ls4b = %ld_________\n", tsch_current_mAh.ls4b);
-    printf("\n________TSCH: mAh.ms2b = %hu_________\n", tsch_current_mAh.ms2b);
+    printf("\n________TSCH: mAh.ms2b = %hu_________\n", tsch_current_mAh.ms2b);*/
+    printf("\n________TSCH: mAh = %lld_________\n", tsch_current_mAh);
     /* Process tx/rx callback and log messages whenever polled */
     process_start(&tsch_pending_events_process, NULL);
     /* periodically send TSCH EBs */
