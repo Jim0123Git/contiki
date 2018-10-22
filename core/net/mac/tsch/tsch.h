@@ -68,7 +68,10 @@
 #ifdef TSCH_CONF_EB_PERIOD
 #define TSCH_EB_PERIOD TSCH_CONF_EB_PERIOD
 #else
+//origin
 #define TSCH_EB_PERIOD (16 * CLOCK_SECOND)
+// 0614 EB interval = 1
+//#define TSCH_EB_PERIOD (1 * CLOCK_SECOND)
 #endif
 
 /* Max Period between two consecutive EBs */

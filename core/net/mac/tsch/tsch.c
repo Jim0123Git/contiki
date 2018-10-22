@@ -763,14 +763,23 @@ PROCESS_THREAD(tsch_send_eb_process, ev, data)
         }
       }
     }
+    
+    // origin delay
+    
     if(tsch_current_eb_period > 0) {
-      /* Next EB transmission with a random delay
-       * within [tsch_current_eb_period*0.75, tsch_current_eb_period[ */
+      // Next EB transmission with a random delay
+      // within [tsch_current_eb_period*0.75, tsch_current_eb_period[ 
       delay = (tsch_current_eb_period - tsch_current_eb_period / 4)
         + random_rand() % (tsch_current_eb_period / 4);
     } else {
       delay = TSCH_EB_PERIOD;
     }
+    
+
+    // 0614 EB interval = 1
+    //printf("TSCH_EB_PERIOD: %d second\n", TSCH_EB_PERIOD);
+    //delay = TSCH_EB_PERIOD;
+    
     etimer_set(&eb_timer, delay);
     PROCESS_WAIT_UNTIL(etimer_expired(&eb_timer));
   }

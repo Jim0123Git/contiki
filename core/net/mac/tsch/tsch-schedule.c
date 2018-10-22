@@ -412,12 +412,17 @@ tsch_schedule_create_minimal(void)
    * We set the link type to advertising, which is not compliant with 6TiSCH minimal schedule
    * but is required according to 802.15.4e if also used for EB transmission.
    * Timeslot: 0, channel offset: 0. */
+   
+  //original
+  
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
       LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
       0, 0);
+  
 
-  // Green add more TxRx slots
+  // set 1st timeslot to do EB, set 50th timeslot to do non-EB
+  /*
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
       LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
@@ -426,18 +431,40 @@ tsch_schedule_create_minimal(void)
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
       LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-      2, 0);
+      50, 0);
+      */
+  /*
+  // 101th timeslot to do EB
+  tsch_schedule_add_link(sf_min,
+      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
+      LINK_TYPE_ADVERTISING_ONLY, &tsch_broadcast_address,
+      101, 0);
+      
 
+
+  // 201th timeslot to do EB
+  tsch_schedule_add_link(sf_min,
+      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
+      LINK_TYPE_ADVERTISING_ONLY, &tsch_broadcast_address,
+      201, 0);
+  */
+
+  // Jamie add more TxRx slots
+  /*
+  tsch_schedule_add_link(sf_min,
+      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
+      LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
+      1, 0);
+  
+  tsch_schedule_add_link(sf_min,
+      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
+      LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
+      2, 0);
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
       LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
       3, 0);
-
-  tsch_schedule_add_link(sf_min,
-      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
-      LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-      4, 0);
-}
+  */
 /*---------------------------------------------------------------------------*/
 /* Prints out the current schedule (all slotframes and links) */
 void
