@@ -184,4 +184,26 @@ void tsch_set_coordinator(int enable);
 /* Set the pan as secured or not */
 void tsch_set_pan_secured(int enable);
 
+/********** Project *********/
+
+/* The Electricity is an absolute slot number over 6 bytes. */
+struct tsch_electricity_t {
+    uint32_t ls4b; /* least significant 4 bytes */
+    uint16_t ms2b; /* most significant 2 byte */
+};
+
+/* Initialize Electricity */
+#define TSCH_AH_INIT(mAh, ms2b_, ls4b_) do { \
+    (mAh).ms2b = (ms2b_); \
+    (mAh).ls4b = (ls4b_); \
+} while(0);
+
+/* Decrement an Electricity by inc (32 bits) */
+#define TSCH_AH_DEC(mAh, dec) do { \
+    uint32_t new_ls4b = (mAh).ls4b - (dec); \
+    if(new_ls4b > (mAh).ls4b) { (mAh).ms2b--; } \
+    (mAh).ls4b = new_ls4b; \
+} while(0);
+
+
 #endif /* __TSCH_H__ */
