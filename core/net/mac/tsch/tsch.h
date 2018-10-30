@@ -191,12 +191,15 @@ struct tsch_electricity_t {
     uint32_t ls4b; /* least significant 4 bytes */
     uint16_t ms2b; /* most significant 2 byte */
 };
-/* The current Electricity */
+/* The current Electricity Jamie*/
+#define TSCH_FULL_MAH                    3000000000000
 extern uint64_t tsch_current_mAh ;
 extern uint32_t tsch_TXslot_consumption ;
 extern uint32_t tsch_RXslot_consumption ;
 extern uint32_t tsch_EBslot_consumption ;
 extern uint32_t tsch_IDLEslot_consumption ;
+
+#define TSCH_MAH_INT_SHIFT               1000000000
 
 /* Initialize Electricity */
 #define TSCH_AH_INIT(mAh, ms2b_, ls4b_) do { \

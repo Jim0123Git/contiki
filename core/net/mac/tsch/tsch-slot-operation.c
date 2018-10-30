@@ -527,13 +527,15 @@ PT_THREAD(tsch_tx_slot(struct pt *pt, struct rtimer *t))
 
         /* EB slot power consumption */
         tsch_current_mAh = tsch_current_mAh - tsch_EBslot_consumption ;
-        printf("_______TSCH EB   slot: mAh = %lld\n", tsch_current_mAh);
+        printf("_______TSCH EB   slot: mAh = ");
+        tsch_print_mah(tsch_current_mAh) ;
       } else {
         packet_ready = 1;
 
         /* Tx(Date) slot power consumption */
         tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;
-        printf("_______TSCH Tx   slot: mAh = %lld\n", tsch_current_mAh);
+        printf("_______TSCH Tx   slot: mAh = ");
+        tsch_print_mah(tsch_current_mAh) ;
       }
 
 #if LLSEC802154_ENABLED
@@ -1006,6 +1008,7 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
           /* Rx slot power consumption */
           tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
           printf("_______TSCH Rx   slot: mAh = %lld\n", tsch_current_mAh);
+          tsch_print_mah(tsch_current_mAh) ;
         }
       }
       TSCH_DEBUG_SLOT_END();
@@ -1054,6 +1057,7 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
         /* idle slot power consumption */
         tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
         printf("_______TSCH idle slot: mAh = %lld, idle slot = %hd\n", tsch_current_mAh, timeslot_diff - 1);
+        tsch_print_mah(tsch_current_mAh) ;
 
         /* Time to next wake up */
         time_to_next_active_slot = timeslot_diff * tsch_timing[tsch_ts_timeslot_length] + drift_correction;
@@ -1098,6 +1102,7 @@ tsch_slot_operation_start(void)
     /* idle slot power consumption */
     tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
     printf("_______TSCH idle slot: mAh = %lld, idle slot = %hd\n", tsch_current_mAh, timeslot_diff - 1);
+    tsch_print_mah(tsch_current_mAh) ;
 
     /* Time to next wake up */
     time_to_next_active_slot = timeslot_diff * tsch_timing[tsch_ts_timeslot_length];
@@ -1116,5 +1121,12 @@ tsch_slot_operation_sync(rtimer_clock_t next_slot_start,
   tsch_current_asn = *next_slot_asn;
   last_sync_asn = tsch_current_asn;
   current_link = NULL;
+}
+/*---------------------------------------------------------------------------*/
+/* 2018/11 Jamie printf mAh*/
+void
+tsch_print_mah(uint64_t mAh)
+{
+  printf("_______TSCH EB   slot: mAh = %lld.%lld\n", tsch_current_mAh / TSCH_MAH_INT_SHIFT , () );
 }
 /*---------------------------------------------------------------------------*/

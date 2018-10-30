@@ -54,6 +54,8 @@
 #define DEBUG DEBUG_NONE
 #include "net/ip/uip-debug.h"
 
+#include "net/mac/tsch/tsch.h"
+
 /* RFC6551 and RFC6719 do not mandate the use of a specific formula to
  * compute the ETX value. This MRHOF implementation relies on the value
  * computed by the link-stats module. It has an optional feature,
@@ -143,16 +145,24 @@ parent_path_cost(rpl_parent_t *p)
   switch(p->dag->instance->mc.type) {
     case RPL_DAG_MC_ETX:
       base = p->mc.obj.etx;
+      //printf("___X___RPL mrhof path etx=%hd\n", base);
       break;
     case RPL_DAG_MC_ENERGY:
       base = p->mc.obj.energy.energy_est << 8;
+      printf("___X___RPL mrhof path energy_est=%hd\n", base);
+      break;
+    case RPL_DAG_MC_ETX_ENERGY:
+      base = p->mc.etx_ng;
+      //printf("___X___RPL mrhof path etx_ng=%hd\n", base);
       break;
     default:
       base = p->rank;
+      //printf("___X___RPL mrhof path noETX_ENERGY=%hd\n", base);
       break;
   }
 #else /* RPL_WITH_MC */
   base = p->rank;
+  printf("___X___RPL mrhof path noMC=%hd\n", base);
 #endif /* RPL_WITH_MC */
 
   /* path cost upper bound: 0xffff */
@@ -246,6 +256,7 @@ static void
 update_metric_container(rpl_instance_t *instance)
 {
   instance->mc.type = RPL_DAG_MC_NONE;
+  printf("___X___RPL mrhof update !RPL_WITH_MC XX\n");
 }
 #else /* RPL_WITH_MC */
 static void
@@ -272,26 +283,47 @@ update_metric_container(rpl_instance_t *instance)
     path_cost = parent_path_cost(dag->preferred_parent);
   }
 
+  printf("___X___RPL mrhof update RPL_WITH_MC VV\n");
   /* Handle the different MC types */
   switch(instance->mc.type) {
     case RPL_DAG_MC_NONE:
+      printf("___X___RPL mrhof update RPL_DAG_MC_NONE\n");
       break;
     case RPL_DAG_MC_ETX:
       instance->mc.length = sizeof(instance->mc.obj.etx);
       instance->mc.obj.etx = path_cost;
+      //printf("___X___RPL mrhof update etx=%hd\n", path_cost);
       break;
     case RPL_DAG_MC_ENERGY:
       instance->mc.length = sizeof(instance->mc.obj.energy);
       if(dag->rank == ROOT_RANK(instance)) {
         type = RPL_DAG_MC_ENERGY_TYPE_MAINS;
+        printf("___X___RPL mrhof update mains:  ");
       } else {
         type = RPL_DAG_MC_ENERGY_TYPE_BATTERY;
+        printf("___X___RPL mrhof update battery:");
       }
       instance->mc.obj.energy.flags = type << RPL_DAG_MC_ENERGY_TYPE;
       /* Energy_est is only one byte, use the least significant byte of the path metric. */
       instance->mc.obj.energy.energy_est = path_cost >> 8;
+      printf("energy flag=%hd,est=%hd\n", instance->mc.obj.energy.flags, instance->mc.obj.energy.energy_est);
+      break;
+    case RPL_DAG_MC_ETX_ENERGY:
+      instance->mc.length = sizeof(instance->mc.etx_ng);
+      instance->mc.etx_ng = path_cost;
+      if( tsch_current_mAh == TSCH_FULL_MAH )
+        instance->mc.energy_ng = 0 ;
+      else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.6 ) )
+        instance->mc.energy_ng = 1 ;
+      else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.3 ) )
+        instance->mc.energy_ng = 2 ;
+      else
+        instance->mc.energy_ng = 3  ;
+
+      //printf("___X___RPL mrhof update etx_ng=%hd\n", path_cost);
       break;
     default:
+      printf("___X___RPL mrhof X:NONE,ETX,ENERGY\n");
       PRINTF("RPL: MRHOF, non-supported MC %u\n", instance->mc.type);
       break;
   }

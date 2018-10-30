@@ -68,6 +68,9 @@
 #define RPL_DIO_MOP_SHIFT                3
 #define RPL_DIO_MOP_MASK                 0x38
 #define RPL_DIO_PREFERENCE_MASK          0x07
+/* 2018/11 Jamie RPL OF */
+#define RPL_DIO_ENERGY_SHIFT             14
+#define RPL_DIO_ETX_MASK                 0x3fff
 
 #define UIP_IP_BUF       ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UIP_ICMP_BUF     ((struct uip_icmp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
@@ -285,6 +288,7 @@ dio_input(void)
   int i;
   int len;
   uip_ipaddr_t from;
+  uint16_t mrhof_ng_rank ; /* 2018/11 Jamie RPL OF */
 
   memset(&dio, 0, sizeof(dio));
 
@@ -383,6 +387,21 @@ dio_input(void)
         } else if(dio.mc.type == RPL_DAG_MC_ENERGY) {
           dio.mc.obj.energy.flags = buffer[i + 6];
           dio.mc.obj.energy.energy_est = buffer[i + 7];
+        } else if(dio.mc.type == RPL_DAG_MC_ETX_ENERGY) {
+          dio.mc.energy_ng = 0 ;
+          dio.mc.etx_ng = 0 ;
+          mrhof_ng_rank = get16(buffer, i + 6);
+          printf("___X___RPL DIO input mrhof_ng_rank=%x\n", mrhof_ng_rank);
+          //printf("___X___RPL DIO input energy_ng=%hd\n", dio.mc.energy_ng);
+          //printf("___X___RPL DIO input energy_ng=%x\n", dio.mc.energy_ng);
+          dio.mc.energy_ng |= mrhof_ng_rank >> RPL_DIO_ENERGY_SHIFT;
+          //printf("___X___RPL DIO input energy_ng=0 -> %hd\n", dio.mc.energy_ng);
+          printf("___X___RPL DIO input energy_ng=0 -> %x\n", dio.mc.energy_ng);
+          //printf("___X___RPL DIO input etx_ng=%hd\n", dio.mc.etx_ng);
+          //printf("___X___RPL DIO input etx_ng=%x\n", dio.mc.etx_ng);
+          dio.mc.etx_ng |= mrhof_ng_rank & RPL_DIO_ETX_MASK;
+          printf("___X___RPL DIO input etx_ng=0 -> %hd\n", dio.mc.etx_ng);
+          printf("___X___RPL DIO input etx_ng=0 -> %x\n", dio.mc.etx_ng);
         } else {
           PRINTF("RPL: Unhandled DAG MC type: %u\n", (unsigned)dio.mc.type);
           goto discard;
@@ -472,6 +491,7 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
   int pos;
   int is_root;
   rpl_dag_t *dag = instance->current_dag;
+  uint16_t mrhof_ng_rank ; /* 2018/11 Jamie RPL OF */
 #if !RPL_LEAF_ONLY
   uip_ipaddr_t addr;
 #endif /* !RPL_LEAF_ONLY */
@@ -539,14 +559,41 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
     if(instance->mc.type == RPL_DAG_MC_ETX) {
       buffer[pos++] = 2;
       set16(buffer, pos, instance->mc.obj.etx);
+      /*  */
+      printf("___X___RPL DIO output etx=%hd\n", instance->mc.obj.etx);
       pos += 2;
     } else if(instance->mc.type == RPL_DAG_MC_ENERGY) {
       buffer[pos++] = 2;
       buffer[pos++] = instance->mc.obj.energy.flags;
       buffer[pos++] = instance->mc.obj.energy.energy_est;
+      /*  */
+      printf("___X___RPL DIO output energy=%hd\n", instance->mc.obj.energy.energy_est);
+    } else if(instance->mc.type == RPL_DAG_MC_ETX_ENERGY) {
+      buffer[pos++] = 2; // DIO Options
+      mrhof_ng_rank = 0 ;
+      //printf("___X___RPL DIO output mrhof_ng_rank 1=%hd\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof_ng_rank 1=%x\n", mrhof_ng_rank);
+      mrhof_ng_rank |= instance->mc.energy_ng << RPL_DIO_ENERGY_SHIFT;
+      printf("___X___RPL DIO output energy_ng -> %hd\n", instance->mc.energy_ng);
+      //printf("___X___RPL DIO output mrhof_ng_rank 2=%hd\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof_ng_rank 2=%x\n", mrhof_ng_rank);
+      if( instance->mc.etx_ng > RPL_DIO_ETX_MASK ) {
+        printf("___ERROR___RPL DIO ETX info overflow!!!!!!!!!!!!!!!!\n");
+        mrhof_ng_rank = RPL_DIO_ETX_MASK ;
+      }
+      else {
+        mrhof_ng_rank |= instance->mc.etx_ng & RPL_DIO_ETX_MASK;
+      }
+      printf("___X___RPL DIO output etx_ng -> %hd\n", instance->mc.etx_ng);
+      //printf("___X___RPL DIO output mrhof_ng_rank 3=%hd\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof_ng_rank 3=%x\n", mrhof_ng_rank);
+      set16(buffer, pos, mrhof_ng_rank);
+      pos += 2;
     } else {
       PRINTF("RPL: Unable to send DIO because of unhandled DAG MC type %u\n",
              (unsigned)instance->mc.type);
+      /*  */
+      printf("___X___RPL DIO NONE\n");
       return;
     }
   }
@@ -565,6 +612,15 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
   pos += 2;
   /* OCP is in the DAG_CONF option */
   set16(buffer, pos, instance->of->ocp);
+
+  /* 2018/11 Jamie 0:of0 1:mrhof */
+  if ( instance->of->ocp == 1 )
+    printf("___X___RPL DIO output ocp= MRHOF\n"); 
+  else if ( instance->of->ocp == 0 )
+    printf("___X___RPL DIO output ocp= OF0\n"); 
+  else
+    printf("___ERROR___RPL DIO output ocp= unknown\n"); 
+
   pos += 2;
   buffer[pos++] = 0; /* reserved */
   buffer[pos++] = instance->default_lifetime;

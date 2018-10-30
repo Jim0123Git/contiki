@@ -99,7 +99,10 @@
 #define RPL_CONF_WITH_DAO_ACK          0
 
 #undef RPL_CONF_OF
-#define RPL_CONF_OF                    rpl_of0
+/* origin OF = OF0 */
+//#define RPL_CONF_OF                    rpl_of0
+/* OF = MRHOF */
+#define RPL_CONF_OF                    RPL_OCP_MRHOF
 
 /* Enable client-side support for COAP observe */
 #define COAP_OBSERVE_CLIENT 1
