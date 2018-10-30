@@ -230,7 +230,12 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
   if(p1 == dag->preferred_parent || p2 == dag->preferred_parent) {
     if(p1_cost < p2_cost + PARENT_SWITCH_THRESHOLD &&
        p1_cost > p2_cost - PARENT_SWITCH_THRESHOLD) {
-      return dag->preferred_parent;
+      if( dag->preferred_parent->mc.type == RPL_DAG_MC_ETX_ENERGY && p1->mc.energy_ng != p2->mc.energy_ng ) {
+        printf("____________RPL use Jamie OF, No more than the threshold, but there is a better battery.\n");
+        return p1->mc.energy_ng < p2->mc.energy_ng ? p1 : p2;
+      }
+      else
+        return dag->preferred_parent;
     }
   }
 

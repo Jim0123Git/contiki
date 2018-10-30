@@ -143,9 +143,8 @@ static clock_time_t tsch_current_eb_period;
 static clock_time_t tsch_current_ka_timeout;
 /* The current Electricity */
 //struct tsch_electricity_t tsch_current_mAh;
-/* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000 */
+/* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000, 1800000000000, 900000000000 */
 uint64_t tsch_current_mAh = TSCH_FULL_MAH ;
-//uint64_t tsch_current_mAh = 1800000000000;
 /* Power cinsumption in each slot mode  */
 /* Tx=0.000111619mAh, Rx=0.000097838mAh, EB=0.000134334mAh, idle=0.000001169mAh*/
 uint32_t tsch_TXslot_consumption = 111619;
