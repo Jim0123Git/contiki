@@ -121,4 +121,7 @@ void tsch_slot_operation_sync(rtimer_clock_t next_slot_start,
 /* Start actual slot operation */
 void tsch_slot_operation_start(void);
 
+/* 2018/11 Jamie printf mAh */
+void tsch_print_mah(uint64_t mAh);
+
 #endif /* __TSCH_SLOT_OPERATION_H__ */

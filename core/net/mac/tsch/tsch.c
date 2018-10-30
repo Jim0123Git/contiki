@@ -1013,7 +1013,9 @@ turn_on(void)
     TSCH_AH_INIT(tsch_current_mAh, 698, 2112827392);
     printf("\n________TSCH: mAh.ls4b = %ld_________\n", tsch_current_mAh.ls4b);
     printf("\n________TSCH: mAh.ms2b = %hu_________\n", tsch_current_mAh.ms2b);*/
-    printf("\n_______TSCH: mAh = %lld\n", tsch_current_mAh);
+    printf("\n_______TSCH: init mAh = ");
+    tsch_print_mah(tsch_current_mAh) ;
+    printf("\n");
     /* Process tx/rx callback and log messages whenever polled */
     process_start(&tsch_pending_events_process, NULL);
     /* periodically send TSCH EBs */
