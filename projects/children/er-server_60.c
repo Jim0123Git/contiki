@@ -113,6 +113,11 @@ extern resource_t res_sht11;
 #endif
 */
 
+/* Jamie 2018/11/10 */
+#include "net/mac/tsch/tsch.h"
+/* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000, 1800000000000, 900000000000 */
+uint64_t tsch_current_mAh = TSCH_FULL_MAH * 0.6 ;
+
 PROCESS(er_example_server, "Erbium Example Server");
 PROCESS(node_process, "RPL Node");
 AUTOSTART_PROCESSES(&er_example_server, &node_process);

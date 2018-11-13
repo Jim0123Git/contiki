@@ -231,7 +231,7 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
     if(p1_cost < p2_cost + PARENT_SWITCH_THRESHOLD &&
        p1_cost > p2_cost - PARENT_SWITCH_THRESHOLD) {
       if( dag->preferred_parent->mc.type == RPL_DAG_MC_ETX_ENERGY && p1->mc.energy_ng != p2->mc.energy_ng ) {
-        printf("____________RPL use Jamie OF, No more than the threshold, but there is a better battery.\n");
+        printf("___X___No more than the threshold, but there is a better battery.\n");
         return p1->mc.energy_ng < p2->mc.energy_ng ? p1 : p2;
       }
       else
@@ -288,7 +288,7 @@ update_metric_container(rpl_instance_t *instance)
     path_cost = parent_path_cost(dag->preferred_parent);
   }
 
-  printf("___X___RPL mrhof update RPL_WITH_MC VV\n");
+  //printf("___X___RPL mrhof-NG\n");
   /* Handle the different MC types */
   switch(instance->mc.type) {
     case RPL_DAG_MC_NONE:
@@ -351,3 +351,24 @@ rpl_of_t rpl_mrhof = {
 };
 
 /** @}*/
+
+/*
+best_parent( oldparent, newparent )
+{
+
+  old_cost = parent_path_cost(oldparent);
+  new_cost = parent_path_cost(newparent);
+
+  // Maintain stability of the preferred parent in case of similar ranks.  
+  if | old_cost - new_cost | < PARENT_SWITCH_THRESHOLD  
+  {
+    // No more than the threshold, but there is a better battery option. 
+    if oldparent.energy_lv != newparent.energy_lv
+      return oldparent.energy_lv < newparent.energy_lv ? oldparent : newparent; 
+    else
+      return oldparent;
+  }
+  
+  return old_cost < new_cost ? oldparent : newparent;
+}
+*/

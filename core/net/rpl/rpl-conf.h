@@ -90,7 +90,7 @@
 #define RPL_DAG_MC RPL_CONF_DAG_MC
 #else
 // #define RPL_DAG_MC RPL_DAG_MC_NONE // origin
-// #define RPL_DAG_MC RPL_DAG_MC_ETX // ETX can let RPL Network work
+//#define RPL_DAG_MC RPL_DAG_MC_ETX // ETX can let RPL Network work
 #define RPL_DAG_MC RPL_DAG_MC_ETX_ENERGY
 #endif /* RPL_CONF_DAG_MC */
 

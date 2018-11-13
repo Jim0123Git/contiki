@@ -526,7 +526,11 @@ PT_THREAD(tsch_tx_slot(struct pt *pt, struct rtimer *t))
         packet_ready = tsch_packet_update_eb(packet, packet_len, current_packet->tsch_sync_ie_offset);
 
         /* EB slot power consumption */
-        tsch_current_mAh = tsch_current_mAh - tsch_EBslot_consumption ;
+        if( tsch_current_mAh < tsch_EBslot_consumption )
+          tsch_current_mAh = 0;
+        else
+          tsch_current_mAh = tsch_current_mAh - tsch_EBslot_consumption ;      
+        //tsch_current_mAh = tsch_current_mAh - tsch_EBslot_consumption ;
         printf("_______TSCH EB   slot: mAh = ");
         tsch_print_mah(tsch_current_mAh) ;
         printf("\n");
@@ -534,7 +538,11 @@ PT_THREAD(tsch_tx_slot(struct pt *pt, struct rtimer *t))
         packet_ready = 1;
 
         /* Tx(Date) slot power consumption */
-        tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;
+        if( tsch_current_mAh < tsch_TXslot_consumption )
+          tsch_current_mAh = 0;
+        else
+          tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;        
+        //tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;
         printf("_______TSCH Tx   slot: mAh = ");
         tsch_print_mah(tsch_current_mAh) ;
         printf("\n");
@@ -1008,7 +1016,11 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
           PT_SPAWN(&slot_operation_pt, &slot_rx_pt, tsch_rx_slot(&slot_rx_pt, t));
 
           /* Rx slot power consumption */
-          tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
+          if( tsch_current_mAh < tsch_RXslot_consumption )
+            tsch_current_mAh = 0;
+          else
+            tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
+          //tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
           printf("_______TSCH Rx   slot: mAh = ");
           tsch_print_mah(tsch_current_mAh) ;
           printf("\n");
@@ -1058,7 +1070,11 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
 
         /* timeslot_diff = number of idle slots  */
         /* idle slot power consumption */
-        tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
+        if( tsch_current_mAh < ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) )
+          tsch_current_mAh = 0;
+        else
+          tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
+        //tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
         printf("_______TSCH idle slot: mAh = ");
         tsch_print_mah(tsch_current_mAh) ;
         printf(", idle slot = %hd\n", timeslot_diff - 1);
@@ -1104,7 +1120,11 @@ tsch_slot_operation_start(void)
 
     /* timeslot_diff = number of idle slots  */
     /* idle slot power consumption */
-    tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
+    if( tsch_current_mAh < ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) )
+      tsch_current_mAh = 0;
+    else
+      tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
+    //tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
     printf("_______TSCH idle slot: mAh = ");
     tsch_print_mah(tsch_current_mAh) ;
     printf(", idle slot = %hd\n", timeslot_diff - 1);
@@ -1133,12 +1153,38 @@ void
 tsch_print_mah(uint64_t mAh)
 {
   uint64_t temp;
+  /*
   if ( mAh > TSCH_MAH_INT_SHIFT ) {
     temp = mAh / TSCH_MAH_INT_SHIFT ;
     printf("%lld.%lld", temp , mAh - ( temp * TSCH_MAH_INT_SHIFT ) );
-    /* Decimal point have little bug: front place after decimal point if is 0 -> invisable */
+    // Decimal point have little bug: front place after decimal point if is 0 -> invisable 
   }
   else
     printf("Warning:Battery Exhausted!!");
+  */
+  if ( mAh > TSCH_MAH_INT_SHIFT ) {
+    temp = mAh / TSCH_MAH_INT_SHIFT ;
+    printf("%lld.", temp);
+    tsch_print_mah_decimal_point(mAh - ( temp * TSCH_MAH_INT_SHIFT ));
+    printf("%lld", mAh - ( temp * TSCH_MAH_INT_SHIFT ) );
+    //printf("_______TSCH compared : mAh = 1.000000000\n");
+    // fixed:Decimal point have little bug: front place after decimal point if is 0 -> invisable 
+  }
+  else
+  {
+    printf("0.");
+    tsch_print_mah_decimal_point(mAh);
+    printf("%lld, Warning:Battery Exhausted!!", mAh);
+    //printf("_______TSCH compared : mAh = 1.000000000\n");
+  }
+}
+/*---------------------------------------------------------------------------*/
+/* 2018/11 Jamie printf mAh */
+void
+tsch_print_mah_decimal_point(uint64_t mAh)
+{
+  uint64_t temp = TSCH_MAH_INT_SHIFT;
+  for( temp = TSCH_MAH_INT_SHIFT/10 ; temp > mAh ; temp/=10 )
+    printf("0");
 }
 /*---------------------------------------------------------------------------*/

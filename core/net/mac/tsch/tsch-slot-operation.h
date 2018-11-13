@@ -123,5 +123,6 @@ void tsch_slot_operation_start(void);
 
 /* 2018/11 Jamie printf mAh */
 void tsch_print_mah(uint64_t mAh);
+void tsch_print_mah_decimal_point(uint64_t mAh);
 
 #endif /* __TSCH_SLOT_OPERATION_H__ */

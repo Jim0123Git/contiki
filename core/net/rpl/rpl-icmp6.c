@@ -391,17 +391,17 @@ dio_input(void)
           dio.mc.energy_ng = 0 ;
           dio.mc.etx_ng = 0 ;
           mrhof_ng_rank = get16(buffer, i + 6);
-          printf("___X___RPL DIO input mrhof_ng_rank=%x\n", mrhof_ng_rank);
+          printf("___X___RPL DIO input mrhof-NG=%x\n", mrhof_ng_rank);
           //printf("___X___RPL DIO input energy_ng=%hd\n", dio.mc.energy_ng);
           //printf("___X___RPL DIO input energy_ng=%x\n", dio.mc.energy_ng);
           dio.mc.energy_ng |= mrhof_ng_rank >> RPL_DIO_ENERGY_SHIFT;
           //printf("___X___RPL DIO input energy_ng=0 -> %hd\n", dio.mc.energy_ng);
-          printf("___X___RPL DIO input energy_ng=0 -> %x\n", dio.mc.energy_ng);
+          //printf("___X___RPL DIO input energy_ng=0 -> %x\n", dio.mc.energy_ng);
           //printf("___X___RPL DIO input etx_ng=%hd\n", dio.mc.etx_ng);
           //printf("___X___RPL DIO input etx_ng=%x\n", dio.mc.etx_ng);
           dio.mc.etx_ng |= mrhof_ng_rank & RPL_DIO_ETX_MASK;
-          printf("___X___RPL DIO input etx_ng=0 -> %hd\n", dio.mc.etx_ng);
-          printf("___X___RPL DIO input etx_ng=0 -> %x\n", dio.mc.etx_ng);
+          //printf("___X___RPL DIO input etx_ng=0 -> %hd\n", dio.mc.etx_ng);
+          //printf("___X___RPL DIO input etx_ng=0 -> %x\n", dio.mc.etx_ng);
         } else {
           PRINTF("RPL: Unhandled DAG MC type: %u\n", (unsigned)dio.mc.type);
           goto discard;
@@ -492,6 +492,7 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
   int is_root;
   rpl_dag_t *dag = instance->current_dag;
   uint16_t mrhof_ng_rank ; /* 2018/11 Jamie RPL OF */
+  int mc_etx_overflow = 0 ;/* 2018/11 Jamie RPL OF */
 #if !RPL_LEAF_ONLY
   uip_ipaddr_t addr;
 #endif /* !RPL_LEAF_ONLY */
@@ -572,21 +573,22 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
       buffer[pos++] = 2; // DIO Options
       mrhof_ng_rank = 0 ;
       //printf("___X___RPL DIO output mrhof_ng_rank 1=%hd\n", mrhof_ng_rank);
-      printf("___X___RPL DIO output mrhof_ng_rank 1=%x\n", mrhof_ng_rank);
+      //printf("___X___RPL DIO output mrhof_ng_rank 1=%x\n", mrhof_ng_rank);
       mrhof_ng_rank |= instance->mc.energy_ng << RPL_DIO_ENERGY_SHIFT;
-      printf("___X___RPL DIO output energy_ng -> %hd\n", instance->mc.energy_ng);
+      //printf("___X___RPL DIO output energy_ng -> %hd\n", instance->mc.energy_ng);
       //printf("___X___RPL DIO output mrhof_ng_rank 2=%hd\n", mrhof_ng_rank);
-      printf("___X___RPL DIO output mrhof_ng_rank 2=%x\n", mrhof_ng_rank);
-      if( instance->mc.etx_ng > RPL_DIO_ETX_MASK ) {
+      //printf("___X___RPL DIO output mrhof_ng_rank 2=%x\n", mrhof_ng_rank);
+      if( instance->mc.etx_ng > RPL_DIO_ETX_MASK || mc_etx_overflow) {
         printf("___ERROR___RPL DIO ETX info overflow!!!!!!!!!!!!!!!!\n");
         mrhof_ng_rank = RPL_DIO_ETX_MASK ;
+        mc_etx_overflow = 1 ;
       }
       else {
         mrhof_ng_rank |= instance->mc.etx_ng & RPL_DIO_ETX_MASK;
       }
-      printf("___X___RPL DIO output etx_ng -> %hd\n", instance->mc.etx_ng);
+      //printf("___X___RPL DIO output etx_ng -> %hd\n", instance->mc.etx_ng);
       //printf("___X___RPL DIO output mrhof_ng_rank 3=%hd\n", mrhof_ng_rank);
-      printf("___X___RPL DIO output mrhof_ng_rank 3=%x\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof-NG=%x\n", mrhof_ng_rank);
       set16(buffer, pos, mrhof_ng_rank);
       pos += 2;
     } else {
@@ -614,12 +616,15 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
   set16(buffer, pos, instance->of->ocp);
 
   /* 2018/11 Jamie 0:of0 1:mrhof */
-  if ( instance->of->ocp == 1 )
-    printf("___X___RPL DIO output ocp= MRHOF\n"); 
-  else if ( instance->of->ocp == 0 )
+  if ( instance->of->ocp == RPL_OCP_MRHOF && instance->mc.type == RPL_DAG_MC_ETX_ENERGY)
+    printf("___X___RPL DIO output ocp= MRHOF-NG\n"); 
+  else if ( instance->of->ocp == RPL_OCP_MRHOF && instance->mc.type == RPL_DAG_MC_ETX )
+    printf("___X___RPL DIO output ocp= MRHOF\n");
+  else if ( instance->of->ocp == RPL_OCP_OF0 )
     printf("___X___RPL DIO output ocp= OF0\n"); 
   else
     printf("___ERROR___RPL DIO output ocp= unknown\n"); 
+
 
   pos += 2;
   buffer[pos++] = 0; /* reserved */
