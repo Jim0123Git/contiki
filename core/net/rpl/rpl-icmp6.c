@@ -358,6 +358,9 @@ dio_input(void)
 
     PRINTF("RPL: DIO option %u, length: %u\n", subopt_type, len - 2);
 
+    if ( dio.ocp == RPL_OCP_OF0 )
+      printf("___X___RPL DIO input ocp= OF0\n"); 
+
     switch(subopt_type) {
       case RPL_OPTION_DAG_METRIC_CONTAINER:
         if(len < 6) {

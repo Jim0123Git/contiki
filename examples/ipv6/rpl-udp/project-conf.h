@@ -30,8 +30,31 @@
 #ifndef PROJECT_CONF_H_
 #define PROJECT_CONF_H_
 
+#undef TSCH_SCHEDULE_CONF_DEFAULT_LENGTH
+//#define TSCH_SCHEDULE_CONF_DEFAULT_LENGTH  1
+#define TSCH_SCHEDULE_CONF_DEFAULT_LENGTH  100
+
+/* Netstack layers */
+#undef NETSTACK_CONF_MAC
+#define NETSTACK_CONF_MAC     tschmac_driver
+#undef NETSTACK_CONF_RDC
+#define NETSTACK_CONF_RDC     nordc_driver
+#undef NETSTACK_CONF_FRAMER
+#define NETSTACK_CONF_FRAMER  framer_802154
+
+/* IEEE802.15.4 frame version */
+#undef FRAME802154_CONF_VERSION
+#define FRAME802154_CONF_VERSION FRAME802154_IEEE802154E_2012
+
+/* TSCH and RPL callbacks */
+#define RPL_CALLBACK_PARENT_SWITCH tsch_rpl_callback_parent_switch
+#define RPL_CALLBACK_NEW_DIO_INTERVAL tsch_rpl_callback_new_dio_interval
+#define TSCH_CALLBACK_JOINING_NETWORK tsch_rpl_callback_joining_network
+#define TSCH_CALLBACK_LEAVING_NETWORK tsch_rpl_callback_leaving_network
+
+
 #ifndef WITH_NON_STORING
-#define WITH_NON_STORING 0 /* Set this to run with non-storing mode */
+#define WITH_NON_STORING 1 /* Set this to run with non-storing mode */
 #endif /* WITH_NON_STORING */
 
 #undef NBR_TABLE_CONF_MAX_NEIGHBORS
@@ -68,5 +91,9 @@
 #undef RPL_CONF_MOP
 #define RPL_CONF_MOP RPL_MOP_NON_STORING /* Mode of operation*/
 #endif /* WITH_NON_STORING */
+
+#if CONTIKI_TARGET_COOJA
+#define COOJA_CONF_SIMULATE_TURNAROUND 0
+#endif /* CONTIKI_TARGET_COOJA */
 
 #endif

@@ -91,6 +91,11 @@ AUTOSTART_PROCESSES(&border_router_process,&webserver_nogui_process);
 #define BUF_USES_STACK 1
 #endif
 
+/* Jamie 2018/11/10 */
+#include "net/mac/tsch/tsch.h"
+/* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000, 1800000000000, 900000000000 */
+uint64_t tsch_current_mAh = 9999000000000 ;
+
 PROCESS(webserver_nogui_process, "Web server");
 PROCESS_THREAD(webserver_nogui_process, ev, data)
 {

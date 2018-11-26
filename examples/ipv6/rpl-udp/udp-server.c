@@ -33,6 +33,9 @@
 #include "net/ip/uip.h"
 #include "net/rpl/rpl.h"
 
+// 2018/06/14 dynamic change minimal schedule
+#include "net/mac/tsch/tsch-schedule.h"
+
 #include "net/netstack.h"
 #include "dev/button-sensor.h"
 #include <stdio.h>
@@ -52,6 +55,14 @@
 
 static struct uip_udp_conn *server_conn;
 
+// 2018/06/14 dynamic change minimal schedule
+//static uint8_t first_packet = 1;
+
+/* Jamie 2018/11/19 */
+#include "net/mac/tsch/tsch.h"
+/* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000, 1800000000000, 900000000000 */
+uint64_t tsch_current_mAh = 9999000000000 ;
+
 PROCESS(udp_server_process, "UDP server process");
 AUTOSTART_PROCESSES(&udp_server_process);
 /*---------------------------------------------------------------------------*/
@@ -61,6 +72,31 @@ tcpip_handler(void)
   char *appdata;
 
   if(uip_newdata()) {
+/*
+    // 2018/06/14 dynamic change minimal schedule
+    if(first_packet){
+
+      // declare temp slotframe
+      struct tsch_slotframe *sf_min;
+
+      // get scheduled slotframe
+      sf_min = tsch_schedule_get_slotframe_by_handle(0);
+
+      // remove appiont Timeslot
+      PRINTF("_____Server remove EB slot in tsch shedule_____\n ");
+      tsch_schedule_remove_link_by_timeslot(sf_min, 1);
+      //tsch_schedule_remove_link_by_timeslot(sf_min, 101);
+      //tsch_schedule_remove_link_by_timeslot(sf_min, 201);
+      first_packet = 0;
+
+      // add new slot to slotframe
+      tsch_schedule_add_link(sf_min,
+            LINK_OPTION_RX,
+            LINK_TYPE_NORMAL, &tsch_broadcast_address,
+            50, 0);
+      PRINTF("______________S___________\n Server \n______________S___________\n");
+    }
+*/
     appdata = (char *)uip_appdata;
     appdata[uip_datalen()] = 0;
     PRINTF("DATA recv '%s' from ", appdata);

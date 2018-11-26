@@ -1,5 +1,6 @@
 *.a
 *.bin
+*.co
 *.map
 *.png
 *.log

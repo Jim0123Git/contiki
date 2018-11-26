@@ -40,6 +40,14 @@
 #include <stdio.h>
 #include <string.h>
 
+// 2018/06/14 dynamic change minimal schedule
+#include "net/mac/tsch/tsch-schedule.h"
+
+/* Jamie 2018/11/19 */
+#include "net/mac/tsch/tsch.h"
+/* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000, 1800000000000, 900000000000 */
+uint64_t tsch_current_mAh = TSCH_FULL_MAH ;
+
 #include "dev/serial-line.h"
 #include "net/ipv6/uip-ds6-route.h"
 
@@ -52,12 +60,13 @@
 #include "net/ip/uip-debug.h"
 
 #ifndef PERIOD
-#define PERIOD 60
+#define PERIOD 30 //
 #endif
 
 #define START_INTERVAL		(15 * CLOCK_SECOND)
 #define SEND_INTERVAL		(PERIOD * CLOCK_SECOND)
 #define SEND_TIME		(random_rand() % (SEND_INTERVAL))
+//#define SEND_TIME		(10 * CLOCK_SECOND)
 #define MAX_PAYLOAD_LEN		30
 
 static struct uip_udp_conn *client_conn;
@@ -105,11 +114,35 @@ send_packet(void *ptr)
 #endif /* SERVER_REPLY */
 
   seq_id++;
-  PRINTF("DATA send to %d 'Hello %d'\n",
-         server_ipaddr.u8[sizeof(server_ipaddr.u8) - 1], seq_id);
-  sprintf(buf, "Hello %d from the client", seq_id);
+  PRINTF("DATA send to %d '_=_=_ %d'\n",
+         server_ipaddr.u8[sizeof(server_ipaddr.u8) - 1], seq_id +100000);
+  sprintf(buf, "_=_=_ %d from the client", seq_id+100000);
   uip_udp_packet_sendto(client_conn, buf, strlen(buf),
                         &server_ipaddr, UIP_HTONS(UDP_SERVER_PORT));
+/*
+  // 2018/06/14 dynamic change minimal schedule
+  // seq_id * packet_interval = sec 
+  if(seq_id == 10){
+    // declare temp slotframe
+    struct tsch_slotframe *sf_min;
+    // get scheduled slotframe
+    sf_min = tsch_schedule_get_slotframe_by_handle(0);
+    PRINTF("______________C___________\n Client \n______________C___________\n");
+      
+    // remove appiont Timeslot
+    //PRINTF("_____Client remove EB slot in tsch shedule_____\n ");
+    //tsch_schedule_remove_link_by_timeslot(sf_min, 1);
+    //tsch_schedule_remove_link_by_timeslot(sf_min, 101);
+    //tsch_schedule_remove_link_by_timeslot(sf_min, 201);
+
+    // // renew slotframe
+    tsch_schedule_add_link(sf_min,
+          LINK_OPTION_TX,
+          LINK_TYPE_NORMAL, &tsch_broadcast_address,
+          50, 0);
+  }
+*/
+
 }
 /*---------------------------------------------------------------------------*/
 static void

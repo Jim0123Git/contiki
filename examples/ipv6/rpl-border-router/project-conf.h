@@ -32,7 +32,7 @@
 #define PROJECT_ROUTER_CONF_H_
 
 #ifndef WITH_NON_STORING
-#define WITH_NON_STORING 0 /* Set this to run with non-storing mode */
+#define WITH_NON_STORING 1 /* Set this to run with non-storing mode */
 #endif /* WITH_NON_STORING */
 
 #if WITH_NON_STORING
@@ -63,5 +63,11 @@
 #ifndef WEBSERVER_CONF_CFS_CONNS
 #define WEBSERVER_CONF_CFS_CONNS 2
 #endif
+
+#include "/media/user/fbc0355f-3964-4a13-b5c5-7b952a15cd0c/contikiUDP/projects/00-common/tsch-project-conf.h"
+
+/* Do not start TSCH at init, wait for NETSTACK_MAC.on() */
+#undef TSCH_CONF_AUTOSTART
+#define TSCH_CONF_AUTOSTART 0
 
 #endif /* PROJECT_ROUTER_CONF_H_ */

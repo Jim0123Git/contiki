@@ -6,6 +6,8 @@ CONTIKI=../../..
 #linker optimizations
 SMALL=1
 
+MODULES += core/net/mac/tsch
+
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 PROJECT_SOURCEFILES += slip-bridge.c
 
