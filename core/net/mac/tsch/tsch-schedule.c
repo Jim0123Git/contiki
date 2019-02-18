@@ -414,10 +414,12 @@ tsch_schedule_create_minimal(void)
    * Timeslot: 0, channel offset: 0. */
    
   //original
+  /*
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
       LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
       0, 0);
+      */
   
 
   // set 1st timeslot to do EB, set 50th timeslot to do non-EB
@@ -449,21 +451,21 @@ tsch_schedule_create_minimal(void)
   */
 
   // Jamie add more TxRx slots
-  /*
-  tsch_schedule_add_link(sf_min,
-      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
-      LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-      1, 0);
   
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
-      LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-      2, 0);
+      LINK_TYPE_ADVERTISING_ONLY, &tsch_broadcast_address,
+      0, 0);
+  
   tsch_schedule_add_link(sf_min,
       LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
-      LINK_TYPE_ADVERTISING, &tsch_broadcast_address,
-      3, 0);
-  */
+      LINK_TYPE_NORMAL, &tsch_broadcast_address,
+      16, 0);
+  tsch_schedule_add_link(sf_min,
+      LINK_OPTION_RX | LINK_OPTION_TX | LINK_OPTION_SHARED | LINK_OPTION_TIME_KEEPING,
+      LINK_TYPE_NORMAL, &tsch_broadcast_address,
+      33, 0);
+  
 }
 /*---------------------------------------------------------------------------*/
 /* Prints out the current schedule (all slotframes and links) */

@@ -46,7 +46,7 @@
 /* Jamie 2018/11/19 */
 #include "net/mac/tsch/tsch.h"
 /* battery init = 3000mAh, 1800mAh(60%), 900mAh(30%), 3000000000000, 1800000000000, 900000000000 */
-uint64_t tsch_current_mAh = TSCH_FULL_MAH ;
+uint64_t tsch_current_mAh = TSCH_FULL_MAH * 0.3 ;
 
 #include "dev/serial-line.h"
 #include "net/ipv6/uip-ds6-route.h"

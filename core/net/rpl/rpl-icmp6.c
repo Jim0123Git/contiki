@@ -68,9 +68,11 @@
 #define RPL_DIO_MOP_SHIFT                3
 #define RPL_DIO_MOP_MASK                 0x38
 #define RPL_DIO_PREFERENCE_MASK          0x07
-/* 2018/11 Jamie RPL OF */
-#define RPL_DIO_ENERGY_SHIFT             14
-#define RPL_DIO_ETX_MASK                 0x3fff
+/* 2018/11 Jamie RPL OF 14+2*/
+/*#define RPL_DIO_ENERGY_SHIFT             14
+#define RPL_DIO_ETX_MASK                 0x3fff*/
+#define RPL_DIO_ENERGY_SHIFT             11
+#define RPL_DIO_ETX_MASK                 0x07ff
 
 #define UIP_IP_BUF       ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UIP_ICMP_BUF     ((struct uip_icmp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
@@ -394,17 +396,17 @@ dio_input(void)
           dio.mc.energy_ng = 0 ;
           dio.mc.etx_ng = 0 ;
           mrhof_ng_rank = get16(buffer, i + 6);
-          printf("___X___RPL DIO input mrhof-NG=%x\n", mrhof_ng_rank);
-          //printf("___X___RPL DIO input energy_ng=%hd\n", dio.mc.energy_ng);
-          //printf("___X___RPL DIO input energy_ng=%x\n", dio.mc.energy_ng);
+          /*printf("___X___RPL DIO input mrhof-NG HEX=%x\n", mrhof_ng_rank);
+          printf("___X___RPL DIO input energy_ng DEC=%hd\n", dio.mc.energy_ng);
+          printf("___X___RPL DIO input energy_ng HEX=%x\n", dio.mc.energy_ng);*/
           dio.mc.energy_ng |= mrhof_ng_rank >> RPL_DIO_ENERGY_SHIFT;
-          //printf("___X___RPL DIO input energy_ng=0 -> %hd\n", dio.mc.energy_ng);
-          //printf("___X___RPL DIO input energy_ng=0 -> %x\n", dio.mc.energy_ng);
-          //printf("___X___RPL DIO input etx_ng=%hd\n", dio.mc.etx_ng);
-          //printf("___X___RPL DIO input etx_ng=%x\n", dio.mc.etx_ng);
+          /*printf("___X___RPL DIO input energy_ng=0 -> %hd(DEX)\n", dio.mc.energy_ng);
+          printf("___X___RPL DIO input energy_ng=0 -> %x(HEX)\n", dio.mc.energy_ng);
+          printf("___X___RPL DIO input etx_ng=%hd\n", dio.mc.etx_ng);
+          printf("___X___RPL DIO input etx_ng=%x\n", dio.mc.etx_ng);*/
           dio.mc.etx_ng |= mrhof_ng_rank & RPL_DIO_ETX_MASK;
-          //printf("___X___RPL DIO input etx_ng=0 -> %hd\n", dio.mc.etx_ng);
-          //printf("___X___RPL DIO input etx_ng=0 -> %x\n", dio.mc.etx_ng);
+          /*printf("___X___RPL DIO input etx_ng=0 -> %hd(DEX)\n", dio.mc.etx_ng);
+          printf("___X___RPL DIO input etx_ng=0 -> %x(HEX)\n", dio.mc.etx_ng);*/
         } else {
           PRINTF("RPL: Unhandled DAG MC type: %u\n", (unsigned)dio.mc.type);
           goto discard;
@@ -575,12 +577,12 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
     } else if(instance->mc.type == RPL_DAG_MC_ETX_ENERGY) {
       buffer[pos++] = 2; // DIO Options
       mrhof_ng_rank = 0 ;
-      //printf("___X___RPL DIO output mrhof_ng_rank 1=%hd\n", mrhof_ng_rank);
-      //printf("___X___RPL DIO output mrhof_ng_rank 1=%x\n", mrhof_ng_rank);
+      /*printf("___X___RPL DIO output mrhof_ng_rank DEC1=%hd\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof_ng_rank HEX1=%x\n", mrhof_ng_rank);*/
       mrhof_ng_rank |= instance->mc.energy_ng << RPL_DIO_ENERGY_SHIFT;
-      //printf("___X___RPL DIO output energy_ng -> %hd\n", instance->mc.energy_ng);
-      //printf("___X___RPL DIO output mrhof_ng_rank 2=%hd\n", mrhof_ng_rank);
-      //printf("___X___RPL DIO output mrhof_ng_rank 2=%x\n", mrhof_ng_rank);
+      /*printf("___X___RPL DIO output energy_ng -> %hd\n", instance->mc.energy_ng);
+      printf("___X___RPL DIO output mrhof_ng_rank DEC2=%hd\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof_ng_rank HEX2=%x\n", mrhof_ng_rank);*/
       if( instance->mc.etx_ng > RPL_DIO_ETX_MASK || mc_etx_overflow) {
         printf("___ERROR___RPL DIO ETX info overflow!!!!!!!!!!!!!!!!\n");
         mrhof_ng_rank = RPL_DIO_ETX_MASK ;
@@ -589,9 +591,9 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
       else {
         mrhof_ng_rank |= instance->mc.etx_ng & RPL_DIO_ETX_MASK;
       }
-      //printf("___X___RPL DIO output etx_ng -> %hd\n", instance->mc.etx_ng);
-      //printf("___X___RPL DIO output mrhof_ng_rank 3=%hd\n", mrhof_ng_rank);
-      printf("___X___RPL DIO output mrhof-NG=%x\n", mrhof_ng_rank);
+      /*printf("___X___RPL DIO output etx_ng -> %hd\n", instance->mc.etx_ng);
+      printf("___X___RPL DIO output mrhof_ng_rank DEC3=%hd\n", mrhof_ng_rank);
+      printf("___X___RPL DIO output mrhof_ng_rank HEX3=%x\n", mrhof_ng_rank);*/
       set16(buffer, pos, mrhof_ng_rank);
       pos += 2;
     } else {

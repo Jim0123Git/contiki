@@ -56,8 +56,8 @@
 #ifdef RPL_CONF_OF_OCP
 #define RPL_OF_OCP RPL_CONF_OF_OCP
 #else /* RPL_CONF_OF_OCP */
-#define RPL_OF_OCP RPL_OCP_OF0
-//#define RPL_OF_OCP RPL_OCP_MRHOF
+//#define RPL_OF_OCP RPL_OCP_OF0
+#define RPL_OF_OCP RPL_OCP_MRHOF
 #endif /* RPL_CONF_OF_OCP */
 
 /*
@@ -68,8 +68,8 @@
 #ifdef RPL_CONF_SUPPORTED_OFS
 #define RPL_SUPPORTED_OFS RPL_CONF_SUPPORTED_OFS
 #else /* RPL_CONF_SUPPORTED_OFS */
-#define RPL_SUPPORTED_OFS {&rpl_of0}
-//#define RPL_SUPPORTED_OFS {&rpl_mrhof}
+//#define RPL_SUPPORTED_OFS {&rpl_of0}
+#define RPL_SUPPORTED_OFS {&rpl_mrhof}
 #endif /* RPL_CONF_SUPPORTED_OFS */
 
 /*
@@ -83,16 +83,16 @@
 #ifdef RPL_CONF_WITH_MC
 #define RPL_WITH_MC RPL_CONF_WITH_MC
 #else /* RPL_CONF_WITH_MC */
-#define RPL_WITH_MC 0 // origin
-//#define RPL_WITH_MC 1
+//#define RPL_WITH_MC 0 // origin
+#define RPL_WITH_MC 1
 #endif /* RPL_CONF_WITH_MC */
 
 /* The MC advertised in DIOs and propagating from the root */
 #ifdef RPL_CONF_DAG_MC
 #define RPL_DAG_MC RPL_CONF_DAG_MC
 #else
-#define RPL_DAG_MC RPL_DAG_MC_NONE // origin
-//#define RPL_DAG_MC RPL_DAG_MC_ETX // ETX can let RPL Network work
+//#define RPL_DAG_MC RPL_DAG_MC_NONE // origin
+#define RPL_DAG_MC RPL_DAG_MC_ETX // ETX can let RPL Network work
 //#define RPL_DAG_MC RPL_DAG_MC_ETX_ENERGY
 #endif /* RPL_CONF_DAG_MC */
 

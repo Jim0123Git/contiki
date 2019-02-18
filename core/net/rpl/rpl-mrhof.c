@@ -90,6 +90,9 @@ to the threshold of 96 in the non-squared case) */
 /* Reject parents that have a higher path cost than the following. */
 #define MAX_PATH_COST      32768   /* Eq path ETX of 256 */
 
+/* 2019/01 Jamie mAh stratification */
+uint8_t mc_mah_stratification(int two_index);
+
 /*---------------------------------------------------------------------------*/
 static void
 reset(rpl_dag_t *dag)
@@ -230,11 +233,11 @@ best_parent(rpl_parent_t *p1, rpl_parent_t *p2)
   if(p1 == dag->preferred_parent || p2 == dag->preferred_parent) {
     if(p1_cost < p2_cost + PARENT_SWITCH_THRESHOLD &&
        p1_cost > p2_cost - PARENT_SWITCH_THRESHOLD) {
-/*      if( dag->preferred_parent->mc.type == RPL_DAG_MC_ETX_ENERGY && p1->mc.energy_ng != p2->mc.energy_ng ) {
+      if( dag->preferred_parent->mc.type == RPL_DAG_MC_ETX_ENERGY && p1->mc.energy_ng != p2->mc.energy_ng ) {
         printf("___X___No more than the threshold, but there is a better battery.\n");
         return p1->mc.energy_ng < p2->mc.energy_ng ? p1 : p2;
       }
-      else*/
+      else
         return dag->preferred_parent;
     }
   }
@@ -316,14 +319,15 @@ update_metric_container(rpl_instance_t *instance)
     case RPL_DAG_MC_ETX_ENERGY:
       instance->mc.length = sizeof(instance->mc.etx_ng);
       instance->mc.etx_ng = path_cost;
-      if( tsch_current_mAh == TSCH_FULL_MAH )
+      /*if( tsch_current_mAh == TSCH_FULL_MAH )
         instance->mc.energy_ng = 0 ;
       else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.6 ) )
         instance->mc.energy_ng = 1 ;
       else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.3 ) )
         instance->mc.energy_ng = 2 ;
       else
-        instance->mc.energy_ng = 3  ;
+        instance->mc.energy_ng = 3  ;*/
+      instance->mc.energy_ng = mc_mah_stratification(5) ;
 
       //printf("___X___RPL mrhof update etx_ng=%hd\n", path_cost);
       break;
@@ -350,25 +354,82 @@ rpl_of_t rpl_mrhof = {
   RPL_OCP_MRHOF
 };
 
-/** @}*/
-
-/*
-best_parent( oldparent, newparent )
+/* 2019/01 Jamie mAh stratification : mc.energy_ng update*/
+uint8_t
+mc_mah_stratification(int two_index)
 {
+  if( tsch_current_mAh == TSCH_FULL_MAH )
+    return 0 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.6 ) && two_index == 2)
+    return 1 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.3 ) && two_index == 2 )
+    return 2 ;
+  else if( two_index == 2 )
+    return 3 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.97 ) && two_index == 5 )
+    return 1 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.94 ) && two_index == 5 )
+    return 2 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.91 ) && two_index == 5 )
+    return 3 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.87 ) && two_index == 5 )
+    return 4 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.84 ) && two_index == 5 )
+    return 5 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.81 ) && two_index == 5 )
+    return 6 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.78 ) && two_index == 5 )
+    return 7 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.75 ) && two_index == 5 )
+    return 8 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.72 ) && two_index == 5 )
+    return 9 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.69 ) && two_index == 5 )
+    return 10 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.66 ) && two_index == 5 )
+    return 11 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.63 ) && two_index == 5 )
+    return 12 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.60 ) && two_index == 5 )
+    return 13 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.57 ) && two_index == 5 )
+    return 14 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.54 ) && two_index == 5 )
+    return 15 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.51 ) && two_index == 5 )
+    return 16 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.48 ) && two_index == 5 )
+    return 17 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.45 ) && two_index == 5 )
+    return 18 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.42 ) && two_index == 5 )
+    return 19 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.39 ) && two_index == 5 )
+    return 20 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.36 ) && two_index == 5 )
+    return 21 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.33 ) && two_index == 5 )
+    return 22 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.30 ) && two_index == 5 )
+    return 23 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.27 ) && two_index == 5 )
+    return 24 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.24 ) && two_index == 5 )
+    return 25 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.21 ) && two_index == 5 )
+    return 26 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.18 ) && two_index == 5 )
+    return 27 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.15 ) && two_index == 5 )
+    return 28 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.13 ) && two_index == 5 )
+    return 29 ;
+  else if( tsch_current_mAh > ( TSCH_FULL_MAH * 0.10 ) && two_index == 5 )
+    return 30 ;
+  else 
+    return 31 ;
 
-  old_cost = parent_path_cost(oldparent);
-  new_cost = parent_path_cost(newparent);
-
-  // Maintain stability of the preferred parent in case of similar ranks.  
-  if | old_cost - new_cost | < PARENT_SWITCH_THRESHOLD  
-  {
-    // No more than the threshold, but there is a better battery option. 
-    if oldparent.energy_lv != newparent.energy_lv
-      return oldparent.energy_lv < newparent.energy_lv ? oldparent : newparent; 
-    else
-      return oldparent;
-  }
-  
-  return old_cost < new_cost ? oldparent : newparent;
 }
-*/
+/*---------------------------------------------------------------------------*/
+
+/** @}*/

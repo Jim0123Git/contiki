@@ -66,6 +66,9 @@
 #endif /* TSCH_LOG_LEVEL */
 #include "net/net-debug.h"
 
+/* print battery per slot 1: print, 0: noprint*/
+#define TSCH_PRINT_BATTERY_PER_SLOT 1
+
 /* TSCH debug macros, i.e. to set LEDs or GPIOs on various TSCH
  * timeslot events */
 #ifndef TSCH_DEBUG_INIT
@@ -530,10 +533,15 @@ PT_THREAD(tsch_tx_slot(struct pt *pt, struct rtimer *t))
           tsch_current_mAh = 0;
         else
           tsch_current_mAh = tsch_current_mAh - tsch_EBslot_consumption ;      
-        //tsch_current_mAh = tsch_current_mAh - tsch_EBslot_consumption ;
-        printf("_______TSCH EB   slot: mAh = ");
-        tsch_print_mah(tsch_current_mAh) ;
-        printf("\n");
+        if(TSCH_PRINT_BATTERY_PER_SLOT){
+          printf("_______TSCH EB   slot: mAh = ");
+          tsch_print_mah(tsch_current_mAh) ;
+          printf("\n");
+        }
+        /*printf("_______TSCH EB   slot: mAh = ");
+          tsch_print_mah(tsch_current_mAh) ;
+          printf("\n");*/
+        
       } else {
         packet_ready = 1;
 
@@ -542,10 +550,15 @@ PT_THREAD(tsch_tx_slot(struct pt *pt, struct rtimer *t))
           tsch_current_mAh = 0;
         else
           tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;        
-        //tsch_current_mAh = tsch_current_mAh - tsch_TXslot_consumption ;
-        printf("_______TSCH Tx   slot: mAh = ");
-        tsch_print_mah(tsch_current_mAh) ;
-        printf("\n");
+        if(TSCH_PRINT_BATTERY_PER_SLOT){
+          printf("_______TSCH Tx   slot: mAh = ");
+          tsch_print_mah(tsch_current_mAh) ;
+          printf("\n");
+        }
+        /*printf("_______TSCH Tx   slot: mAh = ");
+          tsch_print_mah(tsch_current_mAh) ;
+          printf("\n");*/
+        
       }
 
 #if LLSEC802154_ENABLED
@@ -797,7 +810,37 @@ PT_THREAD(tsch_rx_slot(struct pt *pt, struct rtimer *t))
     if(!packet_seen) {
       /* no packets on air */
       tsch_radio_off(TSCH_RADIO_CMD_OFF_FORCE);
+
+      /* Rx GT slot power consumption*/
+      if( tsch_current_mAh < tsch_RXslot_consumption )
+        tsch_current_mAh = 0;
+      else
+        tsch_current_mAh = tsch_current_mAh - ( tsch_RXslot_consumption * 0.22 ) ; // TSCH_CONF_RX_WAIT = 2200
+      if(TSCH_PRINT_BATTERY_PER_SLOT){
+        printf("_______TSCH Rx-GTslot: mAh = ");
+        tsch_print_mah(tsch_current_mAh) ;
+        printf("\n");  
+      }
+      /*printf("_______TSCH Rx-GTslot: mAh = ");
+      tsch_print_mah(tsch_current_mAh) ;
+      printf("\n"); */
     } else {
+      /* Rx slot power consumption (contain Non-child node packet)*/
+      
+      if( tsch_current_mAh < tsch_RXslot_consumption )
+        tsch_current_mAh = 0;
+      else
+        tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
+      if(TSCH_PRINT_BATTERY_PER_SLOT){
+        printf("_______TSCH Rx   slot: mAh = ");
+        tsch_print_mah(tsch_current_mAh) ;
+        printf("\n");  
+      }
+      
+      /*printf("_______TSCH Rx   slot: mAh = ");
+      tsch_print_mah(tsch_current_mAh) ;
+      printf("\n");*/
+
       TSCH_DEBUG_RX_EVENT();
       /* Save packet timestamp */
       rx_start_time = RTIMER_NOW() - RADIO_DELAY_BEFORE_DETECT;
@@ -895,6 +938,19 @@ PT_THREAD(tsch_rx_slot(struct pt *pt, struct rtimer *t))
 
                 /* Copy to radio buffer */
                 NETSTACK_RADIO.prepare((const void *)ack_buf, ack_len);
+
+                /* Rx slot power consumption Fixed:Non-child node packets will consume more than one Rx slot*/
+                /**/
+                /*if( tsch_current_mAh < tsch_RXslot_consumption )
+                  tsch_current_mAh = 0;
+                else
+                  tsch_current_mAh = tsch_current_mAh - tsch_RXslot_consumption ;
+                if(TSCH_PRINT_BATTERY_PER_SLOT){
+                  printf("_______TSCH Rx   slot: mAh = ");
+                  tsch_print_mah(tsch_current_mAh) ;
+                  printf("\n");  
+                }*/
+                /**/
 
                 /* Wait for time to ACK and transmit ACK */
                 TSCH_SCHEDULE_AND_YIELD(pt, t, rx_start_time,
@@ -1016,6 +1072,7 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
           PT_SPAWN(&slot_operation_pt, &slot_rx_pt, tsch_rx_slot(&slot_rx_pt, t));
 
           /* Rx slot power consumption */
+          /*
           if( tsch_current_mAh < tsch_RXslot_consumption )
             tsch_current_mAh = 0;
           else
@@ -1024,6 +1081,7 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
           printf("_______TSCH Rx   slot: mAh = ");
           tsch_print_mah(tsch_current_mAh) ;
           printf("\n");
+          */
         }
       }
       TSCH_DEBUG_SLOT_END();
@@ -1074,10 +1132,14 @@ PT_THREAD(tsch_slot_operation(struct rtimer *t, void *ptr))
           tsch_current_mAh = 0;
         else
           tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
-        //tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
-        printf("_______TSCH idle slot: mAh = ");
+        if(TSCH_PRINT_BATTERY_PER_SLOT){
+          printf("_______TSCH idle slot: mAh = ");
+          tsch_print_mah(tsch_current_mAh) ;
+          printf(", idle slot = %hd\n", timeslot_diff - 1);
+        }
+        /*printf("_______TSCH idle slot: mAh = ");
         tsch_print_mah(tsch_current_mAh) ;
-        printf(", idle slot = %hd\n", timeslot_diff - 1);
+        printf(", idle slot = %hd\n", timeslot_diff - 1);*/
 
         /* Time to next wake up */
         time_to_next_active_slot = timeslot_diff * tsch_timing[tsch_ts_timeslot_length] + drift_correction;
@@ -1124,10 +1186,14 @@ tsch_slot_operation_start(void)
       tsch_current_mAh = 0;
     else
       tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
-    //tsch_current_mAh = tsch_current_mAh - ( tsch_IDLEslot_consumption * ( timeslot_diff - 1 ) ) ;
-    printf("_______TSCH idle slot: mAh = ");
+    if(TSCH_PRINT_BATTERY_PER_SLOT){
+      printf("_______TSCH idle slot: mAh = ");
+      tsch_print_mah(tsch_current_mAh) ;
+      printf(", idle slot = %hd\n", timeslot_diff - 1);    
+    }
+    /*printf("_______TSCH idle slot: mAh = ");
     tsch_print_mah(tsch_current_mAh) ;
-    printf(", idle slot = %hd\n", timeslot_diff - 1);
+    printf(", idle slot = %hd\n", timeslot_diff - 1); */
 
     /* Time to next wake up */
     time_to_next_active_slot = timeslot_diff * tsch_timing[tsch_ts_timeslot_length];
